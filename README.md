@@ -22,6 +22,9 @@ of a FT8 transceiver with the TAB5 Board.
 
 <img width="584" height="456" alt="image" src="https://github.com/user-attachments/assets/7e12ab5a-351e-4c9f-8d9a-291c5406805e" />
 
+Measurement shows that the power output using Barb's DX_Un0 Board is right at 400 mWatt
+and the Tab5 Built In Battery supports continuous operation for 4 Hours.
+
 ## Hopefully, this software project will spawn a new generation of FT8 Transceiver.
 
 
