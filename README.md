@@ -27,4 +27,10 @@ and the Tab5 Built In Battery supports continuous operation for 4 Hours.
 
 ## Hopefully, this software project will spawn a new generation of FT8 Transceiver.
 
+The rig was assembled by grafting a Teensy Audio board onto a DX_Un0 board. Please see the connection drawing in the Connection
+Folder for the required connection between a Teensy Audio Adapter Board Rev. D. here is a link to the Teensy Board Details:
+https://www.pjrc.com/store/teensy3_audio.html
+
+
+
 
