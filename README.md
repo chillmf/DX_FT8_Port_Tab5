@@ -31,6 +31,23 @@ The rig was assembled by grafting a Teensy Audio board onto a DX_Un0 board. Plea
 Folder for the required connection between a Teensy Audio Adapter Board Rev. D. here is a link to the Teensy Board Details:
 https://www.pjrc.com/store/teensy3_audio.html
 
+## Getting Started
+To get started you will need to create and store your station data in a file located on an SD Card. Here is an example of the contents
+of the file.
+
+<img width="290" height="178" alt="image" src="https://github.com/user-attachments/assets/d8d04b5e-d5ac-4944-97c1-180e84b4e731" />
+
+You will need to enter your station details in order to make FT8 contacts. Create the file using a basic text editor and save it with
+the file name of "StationData.ini.
+
+The Section Marked [Wifi] is required for setting the Tab5 Board Real Time Clock, RTC via an Internet Connection to a Network Time Protocol Server.
+You will certainly will want to set the RTC when you first commission your Tab5 with this application. However, once you set the RTC 
+you may remove this section until you want to reset the RTC.
+
+If you remove the RTC Section the application will run without bothering to reset the RTC on opening the application. Or, if you leave
+the RTC Section in the StationData.ini file, the RTC will be updated during opening of the application if the referenced Wifi connection
+is available. It's your choice.
+
 
 
 
