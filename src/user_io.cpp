@@ -39,6 +39,7 @@ void handleBndRaisePulse(bool state);
 void handleFreqLowerPulse(bool state);
 void handleFreqRaisePulse(bool state);
 
+
 // Explicit landscape coordinates mapped to the 1280x720 panel
 UIControl controls[] = {
     // X,   Y,   W,   H,   Main Label,     Type,     Init, Active,   Inactive, Callback
@@ -54,6 +55,7 @@ UIControl controls[] = {
     {440,   100, 100, 50,   "Bnd+",       ONE_SHOT, false,      "",      "",    handleBndRaisePulse},
     {600,   0, 100, 50,      " F-",       ONE_SHOT, false,      "",      "",    handleFreqLowerPulse},
     {600,   100, 100, 50,    " F+",       ONE_SHOT, false,      "",      "",    handleFreqRaisePulse}
+  
 };
     void init_toggle_states(void){
 
@@ -62,7 +64,6 @@ UIControl controls[] = {
         Auto_QSO = 0;
         Free_Index = 0;
         QSO_Fix = 0;
-       // FT8_Touch_Flag = 0;
     }
 
 
@@ -200,6 +201,7 @@ void handleFreqRaisePulse(bool state) {
     }
     
 }
+
 
 // FIXED: Now accurately counts all elements in the array
 const int controlCount = sizeof(controls) / sizeof(controls[0]); 

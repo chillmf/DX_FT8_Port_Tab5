@@ -78,7 +78,8 @@ void update_synchronization()
     WF_counter = 0;
     tx_display_update();
     show_battery_state();
-    display_time(300,1050);
+    display_date(250,1050);
+    display_time(500,1050);
 
   }
 
@@ -119,6 +120,8 @@ void setup() {
     
     init_RxSW();
     init_eeprom();
+    open_stationData_file();
+    setup_RTC();
     Options_Initialize();
     start_Si5351();
     start_freq =14074;
@@ -128,7 +131,6 @@ void setup() {
     init_i2s_duplex();
     init_codec_driver();
     start_time = millis();
-    open_stationData_file();
     init_user_io();
     init_toggle_states();
     display_station_data(0,1050);

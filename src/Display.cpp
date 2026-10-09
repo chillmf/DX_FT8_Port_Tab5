@@ -28,12 +28,38 @@
 #define SCREEN_WIDTH  M5.Display.width()
 #define SCREEN_HEIGHT M5.Display.height()
 
- #define WIFI_SSID     "NETGEAR65"
- #define WIFI_PASSWORD "politetrain921"
+ //char WIFI_PASSWORD[]  = "politetrain921";
+ //char WIFI_SSID[] =      "NETGEAR6567890"; 
+
+ char WIFI_PASSWORD[20];
+ char WIFI_SSID[20]; 
+
  #define NTP_TIMEZONE  "JST-9"
  #define NTP_SERVER1   "0.pool.ntp.org"
  #define NTP_SERVER2   "1.pool.ntp.org"
  #define NTP_SERVER3   "2.pool.ntp.org"
+
+#if defined ( ARDUINO )
+#if __has_include(<WiFi.h>)
+ #include <WiFi.h>
+#endif
+
+
+// Different versions of the framework have different SNTP header file names and availability.
+ #if __has_include (<esp_sntp.h>)
+  #include <esp_sntp.h>
+  #define SNTP_ENABLED 1
+ #elif __has_include (<sntp.h>)
+  #include <sntp.h>
+  #define SNTP_ENABLED 1
+ #endif
+
+#endif
+
+#ifndef SNTP_ENABLED
+#define SNTP_ENABLED 0
+#endif
+
 
  File stationData_File;
 
@@ -194,13 +220,54 @@ static int setup_locator(const char *locator_part)
       Short_Station_Locator[4] = 0;
       M5.Display.setTextSize(3);
       M5.Display.setTextColor(TFT_YELLOW, TFT_BLACK);
-      M5.Display.setCursor(50, 1100);
+      M5.Display.setCursor(100, 1100);
 		  M5.Display.print(Station_Locator);
     }
   }
   return result;
 }
 
+
+
+
+
+
+static int setup_WIFI_SSID(const char *SSID_part)
+{
+  int result = 0;
+  if (SSID_part != NULL)
+  {
+    size_t i = strlen(SSID_part);
+    result = i > 0 && i < sizeof(WIFI_SSID) ? 1 : 0;
+    if (result != 0)
+    {
+      strcpy(WIFI_SSID, SSID_part);
+      M5.Display.setTextSize(3);
+      M5.Display.setTextColor(TFT_YELLOW, TFT_BLACK);
+      M5.Display.setCursor(0, 1000);
+		  M5.Display.print(WIFI_SSID);
+    }
+  }
+  return result;
+}
+
+static int setup_password(const char *PASSWORD_part)
+{
+  int result = 0;
+  if (PASSWORD_part != NULL)
+  {
+    size_t i = strlen(PASSWORD_part);
+    result = i > 0 && i < sizeof(WIFI_PASSWORD) ? 1 : 0;
+    if (result != 0)
+    {
+      strcpy(WIFI_PASSWORD, PASSWORD_part);
+      M5.Display.setTextColor(TFT_YELLOW, TFT_BLACK);
+      M5.Display.setCursor(350, 1000);
+		  M5.Display.print(WIFI_PASSWORD);
+    }
+  }
+  return result;
+}
 
 enum
 {
@@ -293,6 +360,15 @@ bool open_stationData_file(void)
 		if (ini.getValue("Station", "Locator", buffer, bufferLen)) {
 		setup_locator(buffer);
     } 
+
+    if (ini.getValue("Wifi", "WIFI_SSID", buffer, bufferLen)) {
+		setup_WIFI_SSID(buffer);
+    } 
+
+if (ini.getValue("Wifi", "WIFI_PASSWORD", buffer, bufferLen)) {
+		setup_password(buffer);
+    } 
+
  
 	ini.close();
 
@@ -409,4 +485,76 @@ void Display_WF(void) {
 
 
 
- 
+ void setup_RTC(void)
+{
+  auto cfg = M5.config();
+
+  cfg.external_rtc  = true;  // default=false. use Unit RTC.
+
+  M5.begin(cfg);
+
+    M5.Display.setRotation(0);
+    M5.Display.setTextColor(TFT_YELLOW, TFT_BLACK);
+    M5.Display.setTextSize(3);
+    M5.Display.setCursor(0, 200);
+
+  if (!M5.Rtc.isEnabled())
+  {
+	M5.Display.println("RTC not found.");
+    for (;;) { M5.delay(500); }
+  }
+	M5.Display.println("RTC Found.");
+
+
+/// setup RTC ( NTP auto setting )
+  configTzTime(NTP_TIMEZONE, NTP_SERVER1, NTP_SERVER2, NTP_SERVER3);
+#if __has_include(<WiFi.h>)
+  M5.Display.println("WiFi:");
+
+#if defined (CONFIG_IDF_TARGET_ESP32P4)
+  if (M5.getBoard() == m5::board_t::board_M5Tab5) {
+    WiFi.setPins(GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_11, GPIO_NUM_10, GPIO_NUM_9, GPIO_NUM_8, GPIO_NUM_15);
+  }
+#endif
+
+  WiFi.begin( WIFI_SSID, WIFI_PASSWORD );
+
+  for (int i = 20; i && WiFi.status() != WL_CONNECTED; --i)
+  {
+    //M5.Display.println(".");
+    M5.delay(500);
+  }
+  if (WiFi.status() == WL_CONNECTED) {
+    M5.Display.println("\r\nWiFi Connected.");
+    M5.Display.println("NTP:");
+#if SNTP_ENABLED
+    while (sntp_get_sync_status() != SNTP_SYNC_STATUS_COMPLETED)
+    {
+      //M5.Display.println(".");
+      M5.delay(1000);
+    }
+#else
+    M5.delay(1600);
+    struct tm timeInfo;
+    while (!getLocalTime(&timeInfo, 1000))
+    {
+      M5.Log.print('.');
+    };
+#endif
+    M5.Display.println("\r\nNTP Connected.");
+    delay(1000);
+    time_t t = time(nullptr)+1; // Advance one second.
+    while (t > time(nullptr));  /// Synchronization in seconds
+    M5.Rtc.setDateTime( gmtime( &t ) );
+  }
+  else
+  {
+    M5.Display.println("\r\nWiFi none...");
+    delay(1000);
+  }
+#endif
+
+WiFi.disconnectAsync(true, true);
+
+  clear_rx_region();
+}

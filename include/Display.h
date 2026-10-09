@@ -27,7 +27,9 @@ void update_message_log_display(int mode);
 void display_logged_messages(void);
 void Be_Patient(void);
 
-
+static int setup_password(const char *PASSWORD_part);
+static int setup_WIFI_SSID(const char *SSID_part);
+ void setup_RTC(void);
 
 
 
