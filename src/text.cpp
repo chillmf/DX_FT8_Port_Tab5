@@ -14,6 +14,8 @@ const char *trim_front(const char *str)
 void trim_back(char *str)
 {
     // Skip trailing whitespace by replacing it with '\0' characters
+    if (str[0] == '\0')
+        return;
     size_t idx = strlen(str) - 1;
     while (idx >= 0 && str[idx] == ' ')
     {

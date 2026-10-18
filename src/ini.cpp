@@ -102,7 +102,7 @@ void parse_ini(const char *buffer, size_t buffer_len, ini_data_t *ini_data)
                 ini_entry_t *entry = &current_section_ptr->entries[ini_data->sections[current_section].num_entries++];
 
                 copy_and_trim(entry->key, line, min((size_t)(equals_pos - line), sizeof(entry->key) - 1));
-                copy_and_trim(entry->value, equals_pos + 1, min((size_t)(buffer_end - equals_pos + 1), sizeof(entry->value) - 1));
+                copy_and_trim(entry->value, equals_pos + 1, min((size_t)(current_pos - equals_pos - 1), sizeof(entry->value) - 1));
 
                 entry->present = true;
             }

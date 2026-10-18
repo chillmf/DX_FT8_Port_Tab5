@@ -103,7 +103,7 @@ int ft8_decode(void)
     if (chksum != chksum2)
       continue;
 
-    char message[kMax_message_length];
+    char message[70];
 
     char call_to[14];
     char call_from[14];
@@ -223,7 +223,7 @@ void set_QSO_Xmit_Freq(int freq)
 
 void process_selected_Station(int stations_decoded, int TouchIndex)
 {
-  if (stations_decoded > 0 && TouchIndex <= stations_decoded)
+  if (stations_decoded > 0 && TouchIndex < stations_decoded)
   {
     strcpy(Target_Call, new_decoded[TouchIndex].call_from);
     strcpy(Target_Locator, new_decoded[TouchIndex].target_locator);
@@ -279,7 +279,7 @@ void display_messages(Decode new_decoded[], int decoded_messages)
 
     
       // Mark own TX in yellow (WSJT-X)
-    if (was_txing)
+    if (was_txing && strncmp(call_from, Station_Call, CALLSIGN_SIZE) == 0)
     {
       color = Yellow;
     }

@@ -1,8 +1,6 @@
 #ifndef MAIN_
 #define MAIN_
 
-#pragma once
-
 #include "si5351.h"
 
 extern int FT_8_counter;

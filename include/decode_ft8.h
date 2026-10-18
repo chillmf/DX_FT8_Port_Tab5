@@ -43,7 +43,7 @@ struct Decode
 
 struct display_message_details
 {
-    char message[22];
+    char message[40];
     int text_color;
 };
 

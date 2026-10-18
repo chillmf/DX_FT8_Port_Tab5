@@ -31,8 +31,8 @@
  //char WIFI_PASSWORD[]  = "politetrain921";
  //char WIFI_SSID[] =      "NETGEAR6567890"; 
 
- char WIFI_PASSWORD[20];
- char WIFI_SSID[20]; 
+ char WIFI_PASSWORD[33];
+ char WIFI_SSID[33]; 
 
  #define NTP_TIMEZONE  "JST-9"
  #define NTP_SERVER1   "0.pool.ntp.org"
@@ -65,7 +65,7 @@
 
 static const int max_log_messages = 9;
 display_message_details log_messages[max_log_messages];
-char current_message[22];
+char current_message[40];
 
 static int old_rtc_hour = -1;
 
@@ -94,7 +94,7 @@ void init_display (void) {
 void display_time(int x, int y) {
 
 	auto dt = M5.Rtc.getDateTime();
-	char string[11]; // print format stuff
+	char string[16]; // print format stuff
 	sprintf(string, "%02d/%02d/%02d \r\n"
 	
                , dt.time.hours
@@ -379,7 +379,7 @@ if (ini.getValue("Wifi", "WIFI_PASSWORD", buffer, bufferLen)) {
 
 void display_station_data(int x, int y)
 {
-  char str[13];
+  char str[16];
   sprintf(str, "%7s %4s", Station_Call, Short_Station_Locator);
 
   M5.Display.setTextColor(TFT_YELLOW, TFT_BLACK);
@@ -437,7 +437,6 @@ void Display_WF(void) {
 
   dsp_start_time = millis();
 	const int byte_count_to_last_line = FFT_W * (FFT_H - 1);
-	int xmit_flag;
 
 	// shift data in memory by one time step (FFT_W)
 	memmove(WF_Bfr, &WF_Bfr[FFT_W], byte_count_to_last_line);
@@ -487,12 +486,6 @@ void Display_WF(void) {
 
  void setup_RTC(void)
 {
-  auto cfg = M5.config();
-
-  cfg.external_rtc  = true;  // default=false. use Unit RTC.
-
-  M5.begin(cfg);
-
     M5.Display.setRotation(0);
     M5.Display.setTextColor(TFT_YELLOW, TFT_BLACK);
     M5.Display.setTextSize(3);
@@ -506,8 +499,6 @@ void Display_WF(void) {
 	M5.Display.println("RTC Found.");
 
 
-/// setup RTC ( NTP auto setting )
-  configTzTime(NTP_TIMEZONE, NTP_SERVER1, NTP_SERVER2, NTP_SERVER3);
 #if __has_include(<WiFi.h>)
   M5.Display.println("WiFi:");
 
@@ -516,6 +507,9 @@ void Display_WF(void) {
     WiFi.setPins(GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_11, GPIO_NUM_10, GPIO_NUM_9, GPIO_NUM_8, GPIO_NUM_15);
   }
 #endif
+
+/// setup RTC ( NTP auto setting )
+  configTzTime(NTP_TIMEZONE, NTP_SERVER1, NTP_SERVER2, NTP_SERVER3);
 
   WiFi.begin( WIFI_SSID, WIFI_PASSWORD );
 
@@ -528,7 +522,7 @@ void Display_WF(void) {
     M5.Display.println("\r\nWiFi Connected.");
     M5.Display.println("NTP:");
 #if SNTP_ENABLED
-    while (sntp_get_sync_status() != SNTP_SYNC_STATUS_COMPLETED)
+    for (int ntp_tries = 0; ntp_tries < 30 && sntp_get_sync_status() != SNTP_SYNC_STATUS_COMPLETED; ntp_tries++)
     {
       //M5.Display.println(".");
       M5.delay(1000);
@@ -536,7 +530,7 @@ void Display_WF(void) {
 #else
     M5.delay(1600);
     struct tm timeInfo;
-    while (!getLocalTime(&timeInfo, 1000))
+    for (int ntp_tries = 0; ntp_tries < 30 && !getLocalTime(&timeInfo, 1000); ntp_tries++)
     {
       M5.Log.print('.');
     };

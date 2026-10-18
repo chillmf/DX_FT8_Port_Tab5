@@ -7,6 +7,7 @@
 #include "Display.h"
 #include "Process_DSP.h"
 #include "traffic_manager.h"
+#include "options.h"
 
 #define ft8_shift 6.25
 
@@ -141,7 +142,9 @@ void handleRplyToggle(bool state) {
 void handleMsgToggle(bool state) {
 
     Free_Index = 0;
-    
+    free_text = false;
+    CQ_Mode_Index = state ? 2 : 0; // on = POTA, off = standard CQ
+
 }
 void handleFreqToggle(bool state) {
     if (state)  {
@@ -161,11 +164,20 @@ void handleSyncPulse(bool state) {
     FT8_Touch_Flag = 0;
 }
 
+static void apply_band_change(void)
+{
+  start_freq = sBand_Data[BandIndex].Frequency;
+  show_wide(320, 120, start_freq);
+  set_startup_freq();
+  set_Rcvr_Freq();
+  Options_StoreValue(OPTION_Band_Index);
+}
+
 void handleBndLowerPulse(bool state) {
      if (BandIndex > Band_Minimum)
     {
       BandIndex--;
-      show_wide(320, 120, sBand_Data[BandIndex].Frequency); // 790 - 700 = 90
+      apply_band_change();
     };
     
 }
@@ -174,7 +186,7 @@ void handleBndRaisePulse(bool state) {
     if (BandIndex < _10M)
     {
       BandIndex++;
-      show_wide(320, 120, sBand_Data[BandIndex].Frequency); // 790 - 700 = 90
+      apply_band_change();
     }
     
 }
@@ -282,12 +294,11 @@ void process_user_io(void) {
                     }
 
                 }
-
-                FT8_Message_Touch = Xmit_message_Touch(touchX , touchY);
-                FT8_Touch_Flag = FT8_Touch(touchX , touchY);
-                check_WF_Touch(touchX, touchY);
             }
-        
+
+            FT8_Message_Touch = Xmit_message_Touch(touchX , touchY);
+            FT8_Touch_Flag = FT8_Touch(touchX , touchY);
+            check_WF_Touch(touchX, touchY);
         }
        
     }

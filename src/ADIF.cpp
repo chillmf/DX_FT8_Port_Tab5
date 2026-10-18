@@ -81,14 +81,14 @@ void make_time(void)
 {
  auto dt = M5.Rtc.getDateTime();
   sprintf(log_rtc_time_string, "%02i%02i%02i", dt.time.hours,dt.time.minutes,dt.time.seconds);
-  sprintf(display_rtc_time_string, "%2.2i:%2.2i:%2.2i", dt.time.hours,dt.time.minutes,dt.time.seconds);
+  sprintf(display_rtc_time_string, "%02d:%02d:%02d", dt.time.hours,dt.time.minutes,dt.time.seconds);
   
 }
 
 void make_File_Name(void)
 {
   make_date();
-  sprintf((char *)file_name_string, "/ %s.adi", log_rtc_date_string);
+  sprintf((char *)file_name_string, "/%s.adi", log_rtc_date_string);
 }
 
 static void write_log_data(char *data)
@@ -102,8 +102,6 @@ static void write_log_data(char *data)
 
 void Open_Log_File(void){
 
-  auto cfg = M5.config();
-  M5.begin(cfg);
   int sck_pin  = 43;
   int miso_pin = 39;
   int mosi_pin = 44;
@@ -275,25 +273,31 @@ void write_ADIF_Log()
 
   sprintf(freq, "%u.%.3u", sBand_Data[BandIndex].Frequency / 1000, sBand_Data[BandIndex].Frequency % 1000);
 
-  int offset = sprintf(log_line, "<call:%1u>%s ", num_chars(Target_Call), trim_front(Target_Call));
+  int offset = snprintf(log_line, sizeof(log_line), "<call:%1u>%s ", num_chars(Target_Call), trim_front(Target_Call));
   int target_locator_len = num_chars(Target_Locator);
-  if (target_locator_len > 0)
-    offset += sprintf(log_line + offset, "<gridsquare:%1u>%s ", target_locator_len, trim_front(Target_Locator));
-  offset += sprintf(log_line + offset, "<mode:3>FT8<qso_date:%1u>%s ", num_chars(log_rtc_date_string), trim_front(log_rtc_date_string));
-  offset += sprintf(log_line + offset, "<time_on:%1u>%s ", num_chars(log_rtc_time_string), trim_front(log_rtc_time_string));
-  offset += sprintf(log_line + offset, "<freq:%1u>%s ", num_chars(freq), trim_front(freq));
-  offset += sprintf(log_line + offset, "<station_callsign:%1u>%s ", num_chars(Station_Call), trim_front(Station_Call));
-  offset += sprintf(log_line + offset, "<my_gridsquare:%1u>%s ", num_chars(Station_Locator), trim_front(Station_Locator));
+  if (target_locator_len > 0 && offset > 0)
+    offset += snprintf(log_line + offset, sizeof(log_line) - offset, "<gridsquare:%1u>%s ", target_locator_len, trim_front(Target_Locator));
+  if (offset > 0)
+    offset += snprintf(log_line + offset, sizeof(log_line) - offset, "<mode:3>FT8<qso_date:%1u>%s ", num_chars(log_rtc_date_string), trim_front(log_rtc_date_string));
+  if (offset > 0)
+    offset += snprintf(log_line + offset, sizeof(log_line) - offset, "<time_on:%1u>%s ", num_chars(log_rtc_time_string), trim_front(log_rtc_time_string));
+  if (offset > 0)
+    offset += snprintf(log_line + offset, sizeof(log_line) - offset, "<freq:%1u>%s ", num_chars(freq), trim_front(freq));
+  if (offset > 0)
+    offset += snprintf(log_line + offset, sizeof(log_line) - offset, "<station_callsign:%1u>%s ", num_chars(Station_Call), trim_front(Station_Call));
+  if (offset > 0)
+    offset += snprintf(log_line + offset, sizeof(log_line) - offset, "<my_gridsquare:%1u>%s ", num_chars(Station_Locator), trim_front(Station_Locator));
 
   int rsl_len = num_digits(Target_RSL);
-  if (rsl_len > 0)
-    offset += sprintf(log_line + offset, "<rst_sent:%1u:N>%i ", rsl_len, Target_RSL);
+  if (rsl_len > 0 && offset > 0)
+    offset += snprintf(log_line + offset, sizeof(log_line) - offset, "<rst_sent:%1u:N>%i ", rsl_len, Target_RSL);
 
   rsl_len = num_digits(Station_RSL);
-  if (rsl_len > 0)
-    offset += sprintf(log_line + offset, "<rst_rcvd:%1u:N>%i ", rsl_len, Station_RSL);
+  if (rsl_len > 0 && offset > 0)
+    offset += snprintf(log_line + offset, sizeof(log_line) - offset, "<rst_rcvd:%1u:N>%i ", rsl_len, Station_RSL);
 
-  strcpy(log_line + offset, "<tx_pwr:4>0.5 <eor>");
+  if (offset > 0)
+    snprintf(log_line + offset, sizeof(log_line) - offset, "<tx_pwr:4>0.5 <eor>");
 
   // Force NULL termination
   log_line[sizeof(log_line) - 1] = 0;
@@ -302,7 +306,7 @@ void write_ADIF_Log()
   if (Auto_QSO) store_logged_CQ_Call(Target_Call);
 
 
-char received_message[22];
+char received_message[40];
         sprintf(received_message, "%s %s %s", Target_Call, Target_Locator, display_rtc_time_string);
         strcpy(current_message, received_message);
         update_message_log_display(1);

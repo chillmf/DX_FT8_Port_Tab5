@@ -85,7 +85,7 @@ void Options_Initialize(void)
     Options_ResetToDefaults();
     EEPROM.writeShort(20, s_optionsData[0].Initial);
     EEPROM.writeShort(30, s_optionsData[1].Initial);
-
+    EEPROM.commit();
   }
 
   BandIndex = Options_GetValue(0);
@@ -108,4 +108,5 @@ void Options_StoreValue(int optionIdx)
     EEPROM.writeShort(30, option_value);
     break;
   }
+  EEPROM.commit();
 }

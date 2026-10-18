@@ -213,8 +213,8 @@ void process_audio_stream(void){
             hist_Q[hist_ptr] = mixed_Q;
 
             // 5. Convolve through separate I and Q 128-tap integer FIR structures
-            int32_t acc_I = 0;
-            int32_t acc_Q = 0;
+            int64_t acc_I = 0;
+            int64_t acc_Q = 0;
             uint8_t read_ptr = hist_ptr;
 
             for (int k = 0; k < FIR_TAP_COUNT; k++) {
@@ -247,11 +247,13 @@ void process_audio_stream(void){
             if (decimation_counter == 5) {
                 decimation_counter = 0; // Reset counter
                 
-                FT8_Data[ft8_index] = (int16_t)final_Q / attenuation;
-                ft8_index++;
+                if (ft8_flag == 1) {
+                    FT8_Data[ft8_index] = (int16_t)final_Q / attenuation;
+                    ft8_index++;
+                }
 
                 // When array hits 1024 entries, process FFT and wrap index back to 0
-                if (ft8_index > FT8_BUFFER_SIZE) {
+                if (ft8_index >= FT8_BUFFER_SIZE) {
                     process_FT8_FFT();
                     DSP_Flag = 1;
                     //if (xmit_flag && !Tune_On) process_xmit_message();
@@ -282,6 +284,12 @@ void process_audio_stream(void){
     }
 
 } // End of process audio stream
+
+void reset_audio_capture(void)
+{
+    ft8_index = 0;
+    decimation_counter = 0;
+}
 
 
     
