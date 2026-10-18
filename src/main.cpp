@@ -23,8 +23,8 @@ bool tx_pressed = false;
 int log_display_flag;   
 
 
-static char autoseq_txbuf[MAX_MSG_LEN];
-static char autoseq_state_str[MAX_LINE_LEN];
+static char autoseq_txbuf[MAX_MSG_LEN + 1];
+static char autoseq_state_str[MAX_LINE_LEN + 1];
 static bool worked_qsos_in_display = false;
 
 
@@ -64,7 +64,7 @@ void update_synchronization()
   if (current_slot != slot_state)
   {
     // toggle the slot state
-    slot_state ^= 1;
+    slot_state = current_slot;
     if (was_txing)
     {
       autoseq_tick();
@@ -76,6 +76,7 @@ void update_synchronization()
     FT_8_counter = 0;
     ft8_marker = 1;
     WF_counter = 0;
+    reset_audio_capture();
     tx_display_update();
     show_battery_state();
     display_date(250,1050);
@@ -114,7 +115,8 @@ void setup() {
     Serial.begin(115200);
 
     auto cfg = M5.config();
-    cfg.output_power = true; 
+    cfg.output_power = true;
+    cfg.external_rtc = true;
     M5.begin(cfg);
     M5.Power.setExtOutput(true, m5::ext_port_mask_t::ext_PA);
     
@@ -124,7 +126,6 @@ void setup() {
     setup_RTC();
     Options_Initialize();
     start_Si5351();
-    start_freq =14074;
     set_startup_freq();
     init_display();
     init_DSP();
@@ -144,7 +145,7 @@ void setup() {
 void loop() {
     const int offset_index = 8;
 
-   if (!decode_flag)process_audio_stream();
+   process_audio_stream();
    
   if (DSP_Flag)
 
@@ -185,7 +186,7 @@ void loop() {
     {
       if (strindex(new_decoded[i].call_to, Station_Call) >= 0)
       {
-        char received_message[22];
+        char received_message[40];
         sprintf(received_message, "%s %s %s", new_decoded[i].call_to, new_decoded[i].call_from, new_decoded[i].locator);
         strcpy(current_message, received_message);
         //update_message_log_display(0);

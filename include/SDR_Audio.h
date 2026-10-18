@@ -7,6 +7,7 @@ extern int attenuation;
 void init_codec_driver(void);
 void init_i2s_duplex(void);
 void process_audio_stream(void);
+void reset_audio_capture(void);
 void lineInLevel(uint8_t left, uint8_t right) ;
 void process_xmit_message(void);
 

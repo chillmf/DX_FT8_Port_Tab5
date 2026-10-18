@@ -124,16 +124,6 @@ void terminate_transmit_armed(void)
 
 }
 
-int testButton(uint8_t index)
-{
-  if ((draw_x > sButtonData[index].x) && (draw_x < sButtonData[index].x + sButtonData[index].w) && (draw_y > sButtonData[index].y) && (draw_y <= sButtonData[index].y + sButtonData[index].h))
-  {
-    return 1;
-  }
-  else
-    return 0;
-}
-
 int FT8_Touch(int draw_x, int draw_y)
 {
   int y_test;
@@ -187,52 +177,6 @@ void display_Free_Text(void)
   M5.Display.setCursor(100, line5 + 20);
   M5.Display.write(Free_Text2, 14);
   
-}
-
-void reset_buttons(int btn1, int btn2, int btn3, const char *button_text)
-{
-  sButtonData[btn1].state = 0;
-  drawButton(btn1);
-  sButtonData[btn2].state = 0;
-  drawButton(btn2);
-  sButtonData[btn3].state = 0;
-  drawButton(btn3);
-  sButtonData[4].text0 = (char *)button_text;
-  drawButton(4);
-}
-
-void update_CQFree_button()
-{
-  sButtonData[CQFree].state = 0;
-  drawButton(CQFree);
-}
-
-void erase_Cal_Display(void)
-{
-  clear_reply_message_box();
-  M5.Display.fillRect(0, 100, 600, 280, TFT_BLACK); // move tune to left hand pane
-  erase_CQ();
-  for (int i = 11; i < 23; i++)
-    sButtonData[i].Active = 0;
-}
-
-void EEPROMWriteInt(int address, int value)
-{
-  uint16_t internal_value = 32768 + value;
-
-  byte byte1 = internal_value >> 8;
-  byte byte2 = internal_value & 0xFF;
-  EEPROM.write(address, byte1);
-  EEPROM.write(address + 1, byte2);
-}
-
-int EEPROMReadInt(int address)
-{
-  uint16_t byte1 = EEPROM.read(address);
-  uint16_t byte2 = EEPROM.read(address + 1);
-  uint16_t internal_value = (byte1 << 8 | byte2);
-
-  return (int)internal_value - 32768;
 }
 
 void Set_Cursor_Frequency(void)

@@ -10,9 +10,6 @@
 
 #define MESSAGE_SIZE 28
 
-void clear_reply_message_box(void);
-void erase_CQ(void);
-
 // Generate FT8 tone sequence from payload data
 // [IN] payload - 9 byte array consisting of 72 bit payload
 // [OUT] itone  - array of NN (79) bytes to store the generated tones (encoded as 0..7)
